@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-mid: rgba(0,0,0,0.18);
+    --text-primary: #1a1714;
+    --text-secondary: #6b6560;
+    --text-hint: #a09b96;
+    --accent: #3d5a3e;
+    --accent-light: #e8efe8;
+    --danger: #c0392b;
+    --danger-light: #fdf0ef;
+    --blue: #2c4a7c;
+    --blue-light: #eaf0f9;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  .shell {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-left h1 {
+    font-family: 'Lora', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--text-hint);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+  .header-actions { display: flex; gap: 8px; }
+  .hdr-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .hdr-btn:hover { border-color: var(--border-mid); color: var(--text-primary); }
+
+  /* Sections */
+  .section { margin-bottom: 2.5rem; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label h2 {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--border);
+    color: var(--text-secondary);
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+  .add-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px dashed var(--border-mid);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* Book list */
+  .book-list { display: flex; flex-direction: column; gap: 5px; }
+  .book-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .book-row:hover { border-color: var(--border-mid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .book-spine {
+    width: 3px;
+    height: 32px;
+    border-radius: 3px;
+    background: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.4;
+  }
+  .book-spine.read { background: var(--blue); opacity: 0.5; }
+  .book-info { flex: 1; min-width: 0; }
+  .book-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .book-author {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    font-style: italic;
+    font-family: 'Lora', serif;
+  }
+  .book-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .notes-pill {
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-hint);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .notes-pill:hover { border-color: var(--border-mid); color: var(--text-secondary); }
+  .notes-pill.has-notes { color: var(--accent); border-color: #a3c4a3; background: var(--accent-light); }
+  .icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-hint);
+    border-radius: 7px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--bg); color: var(--text-primary); }
+  .icon-btn.done:hover { color: var(--accent); background: var(--accent-light); }
+  .icon-btn.undo:hover { color: var(--blue); background: var(--blue-light); }
+  .icon-btn.del:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* Add form */
+  .add-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .add-form input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 11px;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.15s;
+  }
+  .add-form input:focus { outline: none; border-color: var(--accent); background: #fff; }
+  .add-form input::placeholder { color: var(--text-hint); }
+  .form-row { display: flex; gap: 6px; justify-content: flex-end; }
+  .btn-cancel {
+    font-family: 'DM Sans', sans-serif;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: var(--radius);
+    padding: 7px 13px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-save {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 7px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* Empty state */
+  .empty {
+    font-size: 13px;
+    color: var(--text-hint);
+    padding: 1.25rem;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    font-style: italic;
+    font-family: 'Lora', serif;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--text-primary);
+    color: #fff;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Notes page */
+  .notes-page { display: none; }
+  .notes-page.active { display: block; }
+  .main-page.hidden { display: none; }
+  .back-btn {
+    font-family: 'DM Sans', sans-serif;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 1.5rem;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .back-btn:hover { color: var(--text-primary); }
+  .notes-book-title {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  .notes-book-author {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    font-family: 'Lora', serif;
+  }
+  .notes-textarea {
+    width: 100%;
+    min-height: 360px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    font-size: 15px;
+    line-height: 1.75;
+    background: var(--surface);
+    color: var(--text-primary);
+    font-family: 'Lora', serif;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  .notes-textarea:focus { outline: none; border-color: var(--accent); }
+  .notes-textarea::placeholder { color: var(--text-hint); font-style: italic; }
+  .notes-status {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 8px;
+    text-align: right;
+    height: 16px;
+    font-weight: 300;
+  }
+
+  /* SVG icons (inline) */
+  .ico { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+  .ico-lg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<input type="file" id="import-file" accept=".json" style="display:none" />
+
+<div class="shell">
+  <!-- Main page -->
+  <div class="main-page" id="main-page">
+    <div class="header">
+      <div class="header-left">
+        <h1>Book log</h1>
+        <p>Sorted by author's last name</p>
+      </div>
+      <div class="header-actions">
+        <button class="hdr-btn" id="export-btn">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="hdr-btn" id="import-btn">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">
+          <h2>To read</h2>
+          <span class="badge" id="to-read-count">0</span>
+        </div>
+        <button class="add-btn" id="add-to-read-btn">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add book
+        </button>
+      </div>
+      <div id="add-to-read-form" style="display:none">
+        <div class="add-form">
+          <input id="tr-title" placeholder="Book title" />
+          <input id="tr-author" placeholder="Author (First Last)" />
+          <div class="form-row">
+            <button class="btn-cancel" id="cancel-to-read">Cancel</button>
+            <button class="btn-save" id="save-to-read">Add book</button>
+          </div>
+        </div>
+      </div>
+      <div class="book-list" id="to-read-list"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">
+          <h2>Have read</h2>
+          <span class="badge" id="have-read-count">0</span>
+        </div>
+        <button class="add-btn" id="add-have-read-btn">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add book
+        </button>
+      </div>
+      <div id="add-have-read-form" style="display:none">
+        <div class="add-form">
+          <input id="hr-title" placeholder="Book title" />
+          <input id="hr-author" placeholder="Author (First Last)" />
+          <div class="form-row">
+            <button class="btn-cancel" id="cancel-have-read">Cancel</button>
+            <button class="btn-save" id="save-have-read">Add book</button>
+          </div>
+        </div>
+      </div>
+      <div class="book-list" id="have-read-list"></div>
+    </div>
+  </div>
+
+  <!-- Notes page -->
+  <div class="notes-page" id="notes-page">
+    <button class="back-btn" id="back-btn">
+      <svg class="ico ico-lg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to book log
+    </button>
+    <div class="notes-book-title" id="notes-title"></div>
+    <div class="notes-book-author" id="notes-author"></div>
+    <textarea class="notes-textarea" id="notes-textarea" placeholder="Write your notes, quotes, thoughts…"></textarea>
+    <div class="notes-status" id="notes-status"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'booklog_v1';
+
+let data = { toRead: [], haveRead: [], notes: {} };
+let activeBookId = null;
+let saveTimer = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      data.toRead = saved.toRead || [];
+      data.haveRead = saved.haveRead || [];
+      data.notes = saved.notes || {};
+    }
+  } catch(e) {}
+  renderLists();
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+function sortBooks(list) {
+  return [...list].sort((a, b) => {
+    const la = (a.author.trim().split(/\s+/).pop() || '').toLowerCase();
+    const lb = (b.author.trim().split(/\s+/).pop() || '').toLowerCase();
+    return la.localeCompare(lb);
+  });
+}
+
+function makeBookRow(book, listName) {
+  const hasNotes = data.notes[book.id] && data.notes[book.id].trim().length > 0;
+  const row = document.createElement('div');
+  row.className = 'book-row';
+  row.innerHTML = `
+    <div class="book-spine ${listName === 'haveRead' ? 'read' : ''}"></div>
+    <div class="book-info">
+      <div class="book-title">${esc(book.title)}</div>
+      <div class="book-author">${esc(book.author)}</div>
+    </div>
+    <div class="book-actions">
+      <button class="notes-pill ${hasNotes ? 'has-notes' : ''}" title="Notes">
+        <svg class="ico" style="width:11px;height:11px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        ${hasNotes ? 'notes ✦' : 'notes'}
+      </button>
+      ${listName === 'toRead'
+        ? `<button class="icon-btn done" title="Mark as read">
+            <svg class="ico ico-lg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+           </button>`
+        : `<button class="icon-btn undo" title="Move back to to-read">
+            <svg class="ico ico-lg" viewBox="0 0 24 24"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+           </button>`}
+      <button class="icon-btn del" title="Delete">
+        <svg class="ico ico-lg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>`;
+
+  row.querySelector('.notes-pill').addEventListener('click', () => openNotes(book.id));
+  const actionBtn = row.querySelector('.icon-btn.done, .icon-btn.undo');
+  if (actionBtn) {
+    actionBtn.addEventListener('click', () => {
+      if (listName === 'toRead') markRead(book.id);
+      else markUnread(book.id);
+    });
+  }
+  row.querySelector('.icon-btn.del').addEventListener('click', () => deleteBook(book.id, listName));
+  return row;
+}
+
+function renderLists() {
+  const trList = document.getElementById('to-read-list');
+  const hrList = document.getElementById('have-read-list');
+  trList.innerHTML = '';
+  hrList.innerHTML = '';
+
+  document.getElementById('to-read-count').textContent = data.toRead.length;
+  document.getElementById('have-read-count').textContent = data.haveRead.length;
+
+  const sortedTR = sortBooks(data.toRead);
+  if (sortedTR.length === 0) {
+    trList.innerHTML = '<div class="empty">Your reading list is empty — add a book above</div>';
+  } else {
+    sortedTR.forEach(b => trList.appendChild(makeBookRow(b, 'toRead')));
+  }
+
+  const sortedHR = sortBooks(data.haveRead);
+  if (sortedHR.length === 0) {
+    hrList.innerHTML = '<div class="empty">Books you\'ve finished will appear here</div>';
+  } else {
+    sortedHR.forEach(b => hrList.appendChild(makeBookRow(b, 'haveRead')));
+  }
+}
+
+function addBook(listName) {
+  const titleEl = document.getElementById(listName === 'toRead' ? 'tr-title' : 'hr-title');
+  const authorEl = document.getElementById(listName === 'toRead' ? 'tr-author' : 'hr-author');
+  const title = titleEl.value.trim();
+  const author = authorEl.value.trim();
+  if (!title || !author) { showToast('Please fill in both title and author'); return; }
+  const book = { id: Date.now() + Math.random(), title, author };
+  data[listName].push(book);
+  save();
+  titleEl.value = '';
+  authorEl.value = '';
+  document.getElementById(listName === 'toRead' ? 'add-to-read-form' : 'add-have-read-form').style.display = 'none';
+  renderLists();
+}
+
+function markRead(id) {
+  const idx = data.toRead.findIndex(b => b.id === id);
+  if (idx === -1) return;
+  const [book] = data.toRead.splice(idx, 1);
+  data.haveRead.push(book);
+  save();
+  renderLists();
+}
+
+function markUnread(id) {
+  const idx = data.haveRead.findIndex(b => b.id === id);
+  if (idx === -1) return;
+  const [book] = data.haveRead.splice(idx, 1);
+  data.toRead.push(book);
+  save();
+  renderLists();
+}
+
+function deleteBook(id, listName) {
+  data[listName] = data[listName].filter(b => b.id !== id);
+  save();
+  renderLists();
+}
+
+function openNotes(id) {
+  const allBooks = [...data.toRead, ...data.haveRead];
+  const book = allBooks.find(b => b.id === id);
+  if (!book) return;
+  activeBookId = id;
+  document.getElementById('notes-title').textContent = book.title;
+  document.getElementById('notes-author').textContent = book.author;
+  document.getElementById('notes-textarea').value = data.notes[id] || '';
+  document.getElementById('notes-status').textContent = '';
+  document.getElementById('main-page').classList.add('hidden');
+  document.getElementById('notes-page').classList.add('active');
+  document.getElementById('notes-textarea').focus();
+}
+
+function closeNotes() {
+  document.getElementById('notes-page').classList.remove('active');
+  document.getElementById('main-page').classList.remove('hidden');
+  activeBookId = null;
+  renderLists();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function exportData() {
+  const payload = {
+    exported: new Date().toISOString(),
+    toRead: data.toRead,
+    haveRead: data.haveRead,
+    notes: data.notes
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'book-log-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Exported successfully');
+}
+
+// Wire up events
+document.getElementById('export-btn').addEventListener('click', exportData);
+document.getElementById('import-btn').addEventListener('click', () => document.getElementById('import-file').click());
+document.getElementById('import-file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed.toRead && !parsed.haveRead) throw new Error('bad format');
+      data.toRead = parsed.toRead || [];
+      data.haveRead = parsed.haveRead || [];
+      data.notes = parsed.notes || {};
+      save();
+      renderLists();
+      showToast('Imported successfully');
+    } catch {
+      showToast('Could not read that file');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('add-to-read-btn').addEventListener('click', () => {
+  const form = document.getElementById('add-to-read-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('add-have-read-form').style.display = 'none';
+  if (form.style.display === 'block') document.getElementById('tr-title').focus();
+});
+document.getElementById('cancel-to-read').addEventListener('click', () => {
+  document.getElementById('add-to-read-form').style.display = 'none';
+});
+document.getElementById('save-to-read').addEventListener('click', () => addBook('toRead'));
+document.getElementById('tr-author').addEventListener('keydown', e => { if (e.key === 'Enter') addBook('toRead'); });
+document.getElementById('tr-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('tr-author').focus(); });
+
+document.getElementById('add-have-read-btn').addEventListener('click', () => {
+  const form = document.getElementById('add-have-read-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('add-to-read-form').style.display = 'none';
+  if (form.style.display === 'block') document.getElementById('hr-title').focus();
+});
+document.getElementById('cancel-have-read').addEventListener('click', () => {
+  document.getElementById('add-have-read-form').style.display = 'none';
+});
+document.getElementById('save-have-read').addEventListener('click', () => addBook('haveRead'));
+document.getElementById('hr-author').addEventListener('keydown', e => { if (e.key === 'Enter') addBook('haveRead'); });
+document.getElementById('hr-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('hr-author').focus(); });
+
+document.getElementById('back-btn').addEventListener('click', closeNotes);
+
+document.getElementById('notes-textarea').addEventListener('input', e => {
+  if (!activeBookId) return;
+  data.notes[activeBookId] = e.target.value;
+  save();
+  document.getElementById('notes-status').textContent = 'Saving…';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    document.getElementById('notes-status').textContent = 'Saved';
+  }, 700);
+});
+
+load();
+</script>
+</body>
+</html>
